@@ -1,7 +1,8 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from .models import Post
 from .serializer import PostSerializer
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
 # Create Post List Endpoints that allows users to 
@@ -10,7 +11,12 @@ from .serializer import PostSerializer
 class PostList(generics.ListCreateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    search_fields = ['title', 'content']
+    filterset_fields = ['author', 'date_created']
+    
 # automatically assigned the post to the logged-in user
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
